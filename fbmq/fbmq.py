@@ -356,14 +356,13 @@ class Page(object):
 
         buttons_dict = []
         for button in buttons:
-            if isinstance(button, ButtonWeb):
-                buttons_dict.append(button.json())
-            elif isinstance(button, ButtonPostBack):
-                buttons_dict.append(button.json())
-            elif isinstance(button, ButtonNested):
+            if isinstance(button, ButtonWeb) \
+                    or isinstance(button, ButtonPostBack) \
+                    or isinstance(button, ButtonNested):
                 buttons_dict.append(button.json())
             else:
-                raise ValueError('show_persistent_menu button type must be "url" or "postback"')
+                raise ValueError('show_persistent_menu button type must be '
+                                 '"url", "postback" or "nested"')
 
         self._send_persistant_menu_settings(json.dumps({
             "persistent_menu": [{
