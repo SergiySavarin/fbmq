@@ -29,7 +29,8 @@ class Buttons(object):
                             result.append(ButtonPostBack(title=title, payload=value))
                         elif type == 'phone_number':
                             result.append(ButtonPhoneNumber(title=title, payload=value))
-
+                    elif item.get('type') in ['nested']:
+                        result.append(Buttons.convert_shortcut_buttons(item))
                     else:
                         raise ValueError('Invalid button type')
                 else:
@@ -49,12 +50,29 @@ class ButtonWeb(BaseButton):
         self.title = title
         self.url = url
 
+    def json(self):
+        return {'type': self.type, 'title': self.title, 'url': self.url}
+
 
 class ButtonPostBack(BaseButton):
     def __init__(self, title, payload):
         self.type = 'postback'
         self.title = title
         self.payload = payload
+
+    def json(self):
+        return {'type': self.type, 'title': self.title, 'payload': self.payload}
+
+
+class ButtonNested(BaseButton):
+    def __init__(self, title, buttons):
+        self.type = 'nested'
+        self.title = title
+        self.buttons = buttons
+
+    def json(self):
+        return {'type': self.type, 'title': self.title,
+                'call_to_actions': [button.json() for button in self.buttons]}
 
 
 class ButtonPhoneNumber(BaseButton):

@@ -310,6 +310,15 @@ class Page(object):
         if r.status_code != requests.codes.ok:
             print(r.text)
 
+    def _send_persistant_menu_settings(self, data):
+        r = requests.post("https://graph.facebook.com/v2.6/me/messenger_profile",
+                          params={"access_token": self.page_access_token},
+                          data=data,
+                          headers={'Content-type': 'application/json'})
+
+        if r.status_code != requests.codes.ok:
+            print(r.text)
+
     def greeting(self, text):
         if not text or not isinstance(text, str):
             raise ValueError("greeting text error")
@@ -348,30 +357,23 @@ class Page(object):
         buttons_dict = []
         for button in buttons:
             if isinstance(button, ButtonWeb):
-                buttons_dict.append({
-                    "type": "web_url",
-                    "title": button.title,
-                    "url": button.url
-                })
+                buttons_dict.append(button.json())
             elif isinstance(button, ButtonPostBack):
-                buttons_dict.append({
-                    "type": "postback",
-                    "title": button.title,
-                    "payload": button.payload
-                })
+                buttons_dict.append(button.json())
+            elif isinstance(button, ButtonNested):
+                buttons_dict.append(button.json())
             else:
                 raise ValueError('show_persistent_menu button type must be "url" or "postback"')
 
-        self._send_thread_settings(json.dumps({
-            "setting_type": "call_to_actions",
-            "thread_state": "existing_thread",
-            "call_to_actions": buttons_dict
+        self._send_persistant_menu_settings(json.dumps({
+            "persistent_menu": [{
+                "locale":"default",
+                "call_to_actions": buttons_dict}]
         }))
 
     def hide_persistent_menu(self):
-        self._send_thread_settings(json.dumps({
-            "setting_type": "call_to_actions",
-            "thread_state": "existing_thread"
+        self._send_persistant_menu_settings(json.dumps({
+            "persistent_menu": []
         }))
 
     """
