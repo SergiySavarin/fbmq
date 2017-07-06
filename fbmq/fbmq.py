@@ -52,13 +52,11 @@ class Event(object):
     def message_attachments(self):
         return self.message.get("attachments", [])
 
-    @property
     def attachment_urls(self, first=False):
         urls = [att['payload'].get('url') for att in self.message_attachments]
         if urls:
             return urls[0] if len(urls) == 1 and first else urls
 
-    @property
     def attachment_types(self, first=False):
         types = [att['payload'].get('url') for att in self.message_attachments]
         if types:
